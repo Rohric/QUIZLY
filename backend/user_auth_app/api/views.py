@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from .serializers import RegistrationSerializer, UserSerializer
+from .serializers import RegistrationSerializer, UserSerializer, CustomTokenObtainPairSerializer
 
 
 class RegistrationView(APIView):
@@ -74,11 +74,17 @@ class HElloWorldView(APIView):
         return Response({"message": "Hello World"})
 
 
-class CookieTokenObtainView(TokenObtainPairView):
+class CookieTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        refresh = response.data.get("refresh")
-        access = response.data.get("access")
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        refresh = serializer.validated_data["refresh"]
+        access = serializer.validated_data["access"]
+
+        response = Response({"message": "Login erfolgreich"})
 
         response.set_cookie(key="access_token", value=access, httponly=True, secure=True, samesite="LAX")
         response.set_cookie(key="refresh_token", value=refresh, httponly=True, secure=True, samesite="LAX")
