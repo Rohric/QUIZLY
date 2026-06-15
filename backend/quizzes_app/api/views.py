@@ -1,4 +1,5 @@
 import os
+import traceback
 
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -14,6 +15,11 @@ from .serializers import QuizSerializer
 
 class QuizListCreateView(APIView):
     permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        quizzes = Quiz.objects.filter(owner=request.user)
+        serializer = QuizSerializer(quizzes, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
         url = request.data.get("url")
@@ -58,10 +64,45 @@ class QuizListCreateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            import traceback
-
             traceback.print_exc()
             quiz.status = "failed"
             quiz.save()
             ProcessingLog.objects.create(quiz=quiz, status="error", message=str(e))
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class QuizDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk, user):
+        try:
+            quiz = Quiz.objects.get(pk=pk)
+        except Quiz.DoesNotExist:
+            return None, Response({"detail": "Quiz nicht gefunden."}, status=status.HTTP_404_NOT_FOUND)
+        if quiz.owner != user:
+            return None, Response({"detail": "Zugriff verweigert."}, status=status.HTTP_403_FORBIDDEN)
+        return quiz, None
+
+    def get(self, request, pk):
+        quiz, error = self.get_object(pk, request.user)
+        if error:
+            return error
+        serializer = QuizSerializer(quiz)
+        return Response(serializer.data)
+
+    def patch(self, request, pk):
+        quiz, error = self.get_object(pk, request.user)
+        if error:
+            return error
+        serializer = QuizSerializer(quiz, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        quiz, error = self.get_object(pk, request.user)
+        if error:
+            return error
+        quiz.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
