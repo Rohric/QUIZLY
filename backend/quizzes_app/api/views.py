@@ -10,7 +10,7 @@ from ..models import ProcessingLog, Question, Quiz, Transcript
 from ..services.downloader import download_audio
 from ..services.gemini import generate_quiz
 from ..services.transcriber import transcribe
-from .serializers import QuizSerializer, QuizDetailSerializer
+from .serializers import QuizSerializer, QuizCreateSerializer
 
 
 class QuizListCreateView(APIView):
@@ -60,7 +60,7 @@ class QuizListCreateView(APIView):
             if os.path.exists(audio_path):
                 os.remove(audio_path)
 
-            serializer = QuizDetailSerializer(quiz)
+            serializer = QuizCreateSerializer(quiz)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
@@ -87,14 +87,14 @@ class QuizDetailView(APIView):
         quiz, error = self.get_object(pk, request.user)
         if error:
             return error
-        serializer = QuizDetailSerializer(quiz)
+        serializer = QuizSerializer(quiz)
         return Response(serializer.data)
 
     def patch(self, request, pk):
         quiz, error = self.get_object(pk, request.user)
         if error:
             return error
-        serializer = QuizDetailSerializer(quiz, data=request.data, partial=True)
+        serializer = QuizSerializer(quiz, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

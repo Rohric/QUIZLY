@@ -1,6 +1,6 @@
 import json
 import os
-
+import re
 from google import genai
 
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
@@ -55,9 +55,8 @@ Transkript:
     response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
 
     text = response.text.strip()
-    if text.startswith("```"):
-        text = text.split("```")[1]
-        if text.startswith("json"):
-            text = text[4:]
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        raise ValueError("Kein gültiges JSON in Gemini-Antwort gefunden.")
 
-    return json.loads(text)
+    return json.loads(match.group())

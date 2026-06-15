@@ -9,7 +9,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = ["id", "question_title", "question_options", "answer"]
 
 
-class QuestionDetailSerializer(serializers.ModelSerializer):
+class QuestionCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = ["id", "question_title", "question_options", "answer", "created_at", "updated_at"]
@@ -23,8 +23,8 @@ class QuizSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "description", "created_at", "updated_at", "video_url", "questions"]
 
 
-class QuizDetailSerializer(serializers.ModelSerializer):
-    questions = QuestionDetailSerializer(many=True, read_only=True)
+class QuizCreateSerializer(serializers.ModelSerializer):
+    questions = QuestionCreateSerializer(many=True, read_only=True)
 
     class Meta:
         model = Quiz
