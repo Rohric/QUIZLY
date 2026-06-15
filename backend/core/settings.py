@@ -125,11 +125,7 @@ STATIC_URL = "static/"
 
 
 # Automatically added by cookiecutter template
-INSTALLED_APPS += [
-    "rest_framework",
-    "user_auth_app",
-    "rest_framework_simplejwt",
-]
+INSTALLED_APPS += ["rest_framework", "user_auth_app", "rest_framework_simplejwt", "quizzes_app"]
 
 AUTH_USER_MODEL = "user_auth_app.User"
 
