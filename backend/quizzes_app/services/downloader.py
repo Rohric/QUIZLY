@@ -1,19 +1,28 @@
-import json
 import yt_dlp
+from urllib.parse import urlparse, parse_qs
 
-URL = "https://www.youtube.com/watch?v=BaW_jenozKc"
 
-# ℹ️ See help(yt_dlp.YoutubeDL) for a list of available options and public functions
+def extract_video_id(url: str) -> str:
+    parsed = urlparse(url)
+    video_id = parse_qs(parsed.query).get("v", [None])[0]
+    if not video_id:
+        raise ValueError("Keine gültige YouTube Video-ID gefunden.")
+    return video_id
 
-tmp_filename = "audio"  # oder ein temporärer Pfad
-ydl_opts = {
-    "format": "bestaudio/best",
-    "outtmpl": tmp_filename,
-    "quiet": True,
-    "noplaylist": True,
-}
-with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-    info = ydl.extract_info(URL, download=False)
 
-    # ℹ️ ydl.sanitize_info makes the info json-serializable
-    print(json.dumps(ydl.sanitize_info(info)))
+def download_audio(url: str) -> str:
+    video_id = extract_video_id(url)
+    clean_url = f"https://www.youtube.com/watch?v={video_id}"
+    tmp_filename = "audio"
+
+    ydl_opts = {
+        "format": "bestaudio/best",
+        "outtmpl": tmp_filename,
+        "quiet": True,
+        "noplaylist": True,
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([clean_url])
+
+    return tmp_filename
