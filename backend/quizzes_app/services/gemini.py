@@ -52,7 +52,7 @@ Transkript:
 {transcript}
 """
 
-    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+    response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
 
     text = response.text.strip()
     if text.startswith("```"):

@@ -58,6 +58,9 @@ class QuizListCreateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
+            import traceback
+
+            traceback.print_exc()
             quiz.status = "failed"
             quiz.save()
             ProcessingLog.objects.create(quiz=quiz, status="error", message=str(e))

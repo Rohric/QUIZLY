@@ -1,4 +1,9 @@
+import os
 import whisper
+
+os.environ["PATH"] += (
+    r";C:\Users\emilm\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Essentials_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-essentials_build\bin"
+)
 
 
 def transcribe(audio_path: str) -> dict:

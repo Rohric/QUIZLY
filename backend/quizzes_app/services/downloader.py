@@ -1,3 +1,4 @@
+import os
 import yt_dlp
 from urllib.parse import urlparse, parse_qs
 
@@ -20,9 +21,13 @@ def download_audio(url: str) -> str:
         "outtmpl": tmp_filename,
         "quiet": True,
         "noplaylist": True,
+        "ffmpeg_location": r"C:\Users\emilm\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Essentials_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-essentials_build\bin",
+        "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}],
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([clean_url])
+    import glob
 
-    return tmp_filename
+    print("Gefundene Dateien:", glob.glob("audio*"))
+    return "audio.mp3"
