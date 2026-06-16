@@ -81,7 +81,14 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
----
+**7. Running the Server**
+
+```bash
+python manage.py runserver
+```
+
+The API will be available at `http://127.0.0.1:8000/`.
+
 
 ## Environment Variables
 
@@ -142,15 +149,7 @@ All Python dependencies are listed in `requirements.txt`. Key libraries:
 
 ---
 
-## Running the Server
 
-```bash
-python manage.py runserver
-```
-
-The API will be available at `http://127.0.0.1:8000/`.
-
----
 
 ## Authentication & User Workflow
 
