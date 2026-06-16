@@ -14,14 +14,18 @@ from .serializers import QuizSerializer, QuizCreateSerializer
 
 
 class QuizListCreateView(APIView):
+    """API view to list all quizzes of the authenticated user or create a new one."""
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """Return all quizzes owned by the current user."""
         quizzes = Quiz.objects.filter(owner=request.user)
         serializer = QuizSerializer(quizzes, many=True)
         return Response(serializer.data)
 
     def post(self, request):
+        """Download, transcribe, and generate a quiz from a YouTube URL."""
         url = request.data.get("url")
         if not url:
             return Response({"detail": "URL ist erforderlich."}, status=status.HTTP_400_BAD_REQUEST)
@@ -72,9 +76,14 @@ class QuizListCreateView(APIView):
 
 
 class QuizDetailView(APIView):
+    """API view to retrieve, update, or delete a single quiz."""
+
     permission_classes = [IsAuthenticated]
 
     def get_object(self, pk, user):
+        """Fetch a quiz by ID and verify ownership.
+
+        Returns a (quiz, None) tuple on success or (None, error Response) if not found or forbidden."""
         try:
             quiz = Quiz.objects.get(pk=pk)
         except Quiz.DoesNotExist:
@@ -84,6 +93,7 @@ class QuizDetailView(APIView):
         return quiz, None
 
     def get(self, request, pk):
+        """Return a single quiz by ID."""
         quiz, error = self.get_object(pk, request.user)
         if error:
             return error
@@ -91,6 +101,7 @@ class QuizDetailView(APIView):
         return Response(serializer.data)
 
     def patch(self, request, pk):
+        """Partially update a quiz (title or description)."""
         quiz, error = self.get_object(pk, request.user)
         if error:
             return error
@@ -101,6 +112,7 @@ class QuizDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
+        """Delete a quiz permanently."""
         quiz, error = self.get_object(pk, request.user)
         if error:
             return error

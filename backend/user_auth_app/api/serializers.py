@@ -6,6 +6,8 @@ User = get_user_model()
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
+    """Serializer for user registration with password confirmation."""
+
     repeated_password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -14,17 +16,22 @@ class RegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}, "email": {"required": True}}
 
     def validate_repeated_password(self, value):
+        """Check that password and repeated_password match."""
         password = self.initial_data.get("password")
         if password and value and password != value:
             raise serializers.ValidationError("Passwords do not match")
         return value
 
     def validate_email(self, value):
+        """Check that the email address is not already in use."""
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already exists")
         return value
 
     def save(self):
+        """Create and return a new user with the validated data.
+
+        Returns the saved User instance."""
         pw = self.validated_data["password"]
 
         account = User(email=self.validated_data["email"], username=self.validated_data["username"])
@@ -34,16 +41,21 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Serializer for reading and updating user profile data."""
+
     class Meta:
         model = User
         fields = ["id", "username", "email", "birthdate", "address"]
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Token serializer that authenticates by username and password."""
+
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
+        """Validate credentials and return access and refresh tokens."""
         username = attrs.get("username")
         password = attrs.get("password")
 

@@ -9,9 +9,12 @@ from .serializers import RegistrationSerializer, UserSerializer, CustomTokenObta
 
 
 class RegistrationView(APIView):
+    """API view for registering a new user account."""
+
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """Create a new user account."""
         serializer = RegistrationSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -22,9 +25,12 @@ class RegistrationView(APIView):
 
 
 class LogoutView(APIView):
+    """API view to log out the current user by deleting auth cookies."""
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        """Delete the access and refresh token cookies."""
         response = Response({"detail": "Erfolgreich abgemeldet."}, status=status.HTTP_200_OK)
         response.delete_cookie("access_token")
         response.delete_cookie("refresh_token")
@@ -32,13 +38,17 @@ class LogoutView(APIView):
 
 
 class ProfileView(APIView):
+    """API view to read or update the authenticated user's profile."""
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """Return the profile of the current user."""
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
     def patch(self, request):
+        """Partially update the profile of the current user."""
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -47,9 +57,12 @@ class ProfileView(APIView):
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
+    """Login view that sets JWT tokens as httpOnly cookies instead of returning them in the body."""
+
     serializer_class = CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
+        """Authenticate the user and set access and refresh token cookies."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -66,7 +79,10 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 
 
 class CookieTokenRefreshView(TokenRefreshView):
+    """Token refresh view that reads the refresh token from a cookie."""
+
     def post(self, request, *args, **kwargs):
+        """Issue a new access token using the refresh_token cookie."""
         refresh_token = request.COOKIES.get("refresh_token")
 
         if refresh_token is None:

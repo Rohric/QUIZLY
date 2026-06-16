@@ -7,6 +7,9 @@ client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
 
 def generate_quiz(transcript: str) -> dict:
+    """Generate a 10-question quiz from a transcript using the Gemini API.
+
+    Returns a dict with title, description, and a list of questions."""
     prompt = f"""
 Based on the following transcript, generate a quiz in valid JSON format.
 
