@@ -48,6 +48,8 @@ Requirements:
 
 - Do not include explanations, comments, or any text outside the JSON.
 
+- All text fields (title, description, questions, answers) must be written in German.
+
 Transkript:
 {transcript}
 """
