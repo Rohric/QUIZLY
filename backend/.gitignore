@@ -19,7 +19,9 @@ media/
 
 # Environment variables
 .env
-.env.*
+.env.local
+.env.*.local
+!.env.template
 
 # IDE
 .vscode/

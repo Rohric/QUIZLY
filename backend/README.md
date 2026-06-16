@@ -61,7 +61,13 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
-**4. Set up your environment file** — see the section below.
+**4. Set up your environment file**
+
+Copy the template and fill in your own values — see [Environment Variables](#environment-variables) below.
+
+```bash
+cp .env.template .env
+```
 
 **5. Apply migrations**
 
@@ -79,7 +85,7 @@ python manage.py createsuperuser
 
 ## Environment Variables
 
-This project uses a `.env` file to keep secrets out of version control. The file is listed in `.gitignore` and must **never** be committed.
+This project uses a `.env` file to keep secrets out of version control. The file is listed in `.gitignore` and must **never** be committed. The `.env.template` file shows all required variables with placeholder values — copy it and replace each placeholder with your own key.
 
 **Step 1 — Copy the template**
 
@@ -96,13 +102,13 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 GEMINI_API_KEY=your-gemini-api-key
 ```
 
-You can generate a Django secret key with:
+**`SECRET_KEY`** — A long random string used by Django for cryptographic signing. Generate one with:
 
 ```bash
 python manage.py shell -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-Your Gemini API key can be obtained for free at https://ai.google.dev/.
+**`GEMINI_API_KEY`** — Required for AI quiz generation. Create a free account at https://ai.google.dev/ and generate an API key there. Without this key the quiz creation endpoint will fail.
 
 ---
 
