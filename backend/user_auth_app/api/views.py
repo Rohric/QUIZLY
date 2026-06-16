@@ -78,30 +78,42 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         return response
 
 
+def _get_refresh_token_from_request(request):
+    """Extract refresh token from request cookies.
+
+    Returns token or raises Response error."""
+    refresh_token = request.COOKIES.get("refresh_token")
+    if refresh_token is None:
+        raise Response(
+            {"detail": "Refresh token not found."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return refresh_token
+
+
+def _validate_and_get_access_token(serializer):
+    """Validate serializer and extract access token.
+
+    Returns access token or raises Response error."""
+    try:
+        serializer.is_valid(raise_exception=True)
+    except ValidationError:
+        raise Response(
+            {"detail": "Refresh token is invalid."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+    return serializer.validated_data.get("access")
+
+
 class CookieTokenRefreshView(TokenRefreshView):
     """Token refresh view that reads the refresh token from a cookie."""
 
     def post(self, request, *args, **kwargs):
         """Issue a new access token using the refresh_token cookie."""
-        refresh_token = request.COOKIES.get("refresh_token")
-
-        if refresh_token is None:
-            return Response(
-                {"detail": "Refresh token not found."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        refresh_token = _get_refresh_token_from_request(request)
         serializer = self.get_serializer(data={"refresh": refresh_token})
-
-        try:
-            serializer.is_valid(raise_exception=True)
-        except ValidationError:
-            return Response(
-                {"detail": "Refresh token is invalid."},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-        access_token = serializer.validated_data.get("access")
+        access_token = _validate_and_get_access_token(serializer)
 
         response = Response({"message": "Access token refreshed."})
         response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="LAX")
-
         return response
