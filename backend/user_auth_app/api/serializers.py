@@ -15,17 +15,17 @@ class RegistrationSerializer(serializers.ModelSerializer):
         fields = ["username", "email", "password", "confirmed_password"]
         extra_kwargs = {"password": {"write_only": True}, "email": {"required": True}}
 
-    def validate_repeated_password(self, value):
+    def validate_confirmed_password(self, value):
         """Check that password and confirmed_password match."""
         password = self.initial_data.get("password")
         if password and value and password != value:
-            raise serializers.ValidationError("Passwords do not match")
+            raise serializers.ValidationError("Passwords do not match.")
         return value
 
     def validate_email(self, value):
         """Check that the email address is not already in use."""
         if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Email already exists")
+            raise serializers.ValidationError("This email address is already in use.")
         return value
 
     def save(self):
@@ -62,10 +62,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            raise serializers.ValidationError("Ungültiger username oder passwort")
+            raise serializers.ValidationError("Invalid username or password.")
 
         if not user.check_password(password):
-            raise serializers.ValidationError("Ungültiger username oder passwort")
+            raise serializers.ValidationError("Invalid username or password.")
 
         data = super().validate({"username": user.username, "password": password})
         return data

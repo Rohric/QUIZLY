@@ -10,7 +10,7 @@ def extract_video_id(url: str) -> str:
     parsed = urlparse(url)
     video_id = parse_qs(parsed.query).get("v", [None])[0]
     if not video_id:
-        raise ValueError("Keine gültige YouTube Video-ID gefunden.")
+        raise ValueError("No valid YouTube video ID found.")
     return video_id
 
 
@@ -27,7 +27,6 @@ def download_audio(url: str) -> str:
         "outtmpl": tmp_filename,
         "quiet": True,
         "noplaylist": True,
-        "ffmpeg_location": r"C:\Users\emilm\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg.Essentials_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-essentials_build\bin",
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}],
     }
 
@@ -35,5 +34,5 @@ def download_audio(url: str) -> str:
         ydl.download([clean_url])
     import glob
 
-    print("Gefundene Dateien:", glob.glob("audio*"))
+    print("Found files:", glob.glob("audio*"))
     return "audio.mp3"

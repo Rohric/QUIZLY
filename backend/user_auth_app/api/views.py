@@ -31,7 +31,7 @@ class LogoutView(APIView):
 
     def post(self, request):
         """Delete the access and refresh token cookies."""
-        response = Response({"detail": "Erfolgreich abgemeldet."}, status=status.HTTP_200_OK)
+        response = Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
         response.delete_cookie("access_token")
         response.delete_cookie("refresh_token")
         return response
@@ -69,12 +69,12 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         refresh = serializer.validated_data["refresh"]
         access = serializer.validated_data["access"]
 
-        response = Response({"message": "Login erfolgreich"})
+        response = Response({"message": "Login successful."})
 
         response.set_cookie(key="access_token", value=access, httponly=True, secure=True, samesite="LAX")
         response.set_cookie(key="refresh_token", value=refresh, httponly=True, secure=True, samesite="LAX")
 
-        response.data = {"message": "Login erfolgreich"}
+        response.data = {"message": "Login successful."}
         return response
 
 
@@ -87,7 +87,7 @@ class CookieTokenRefreshView(TokenRefreshView):
 
         if refresh_token is None:
             return Response(
-                {"detail": "Refresh token not found!"},
+                {"detail": "Refresh token not found."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         serializer = self.get_serializer(data={"refresh": refresh_token})
@@ -96,12 +96,12 @@ class CookieTokenRefreshView(TokenRefreshView):
             serializer.is_valid(raise_exception=True)
         except ValidationError:
             return Response(
-                {"detail": "Refresh token is invalid!"},
+                {"detail": "Refresh token is invalid."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         access_token = serializer.validated_data.get("access")
 
-        response = Response({"message": "access Token refreshed"})
+        response = Response({"message": "Access token refreshed."})
         response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="LAX")
 
         return response

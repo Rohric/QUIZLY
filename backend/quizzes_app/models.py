@@ -3,35 +3,35 @@ from django.db import models
 
 
 class Quiz(models.Model):
-    """Hauptmodell für ein Quiz basierend auf einer YouTube-Video"""
+    """Main model for a quiz based on a YouTube video."""
 
     STATUS_CHOICES = [
-        ("processing", "Wird verarbeitet"),
-        ("completed", "Fertig"),
-        ("failed", "Fehler"),
+        ("processing", "Processing"),
+        ("completed", "Completed"),
+        ("failed", "Failed"),
     ]
 
-    # Beziehungen
+    # Relations
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="quizzes",
-        help_text="Der Benutzer, dem das Quiz gehört",
+        help_text="The user who owns this quiz.",
     )
 
-    # Basis-Informationen
-    title = models.CharField(max_length=255, help_text="Titel des Quiz")
-    description = models.TextField(blank=True, default="", help_text="Beschreibung des Quiz")
-    video_url = models.URLField(help_text="URL zum YouTube-Video")
+    # Base fields
+    title = models.CharField(max_length=255, help_text="Title of the quiz.")
+    description = models.TextField(blank=True, default="", help_text="Description of the quiz.")
+    video_url = models.URLField(help_text="URL of the YouTube video.")
 
     # Status & Tracking
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="processing", help_text="Verarbeitungsstatus des Quiz"
+        max_length=20, choices=STATUS_CHOICES, default="processing", help_text="Processing status of the quiz."
     )
 
     # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True, help_text="Zeitstempel der Erstellung")
-    updated_at = models.DateTimeField(auto_now=True, help_text="Zeitstempel der letzten Änderung")
+    created_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp of creation.")
+    updated_at = models.DateTimeField(auto_now=True, help_text="Timestamp of last update.")
 
     class Meta:
         ordering = ["-created_at"]
@@ -45,44 +45,44 @@ class Quiz(models.Model):
 
 
 class Transcript(models.Model):
-    """Speichert den Transkript des YouTube-Videos"""
+    """Stores the transcript of a YouTube video."""
 
-    # Beziehung
-    quiz = models.OneToOneField(Quiz, on_delete=models.CASCADE, related_name="transcript", help_text="Zugehöriges Quiz")
+    # Relations
+    quiz = models.OneToOneField(Quiz, on_delete=models.CASCADE, related_name="transcript", help_text="Associated quiz.")
 
-    # Transkript-Daten
-    raw_text = models.TextField(help_text="Rohtext des Transkripts von Whisper")
-    duration = models.IntegerField(null=True, blank=True, help_text="Länge des Videos in Sekunden")
-    language = models.CharField(max_length=10, default="de", help_text="Erkannte Sprache (z.B. 'de', 'en')")
+    # Transcript data
+    raw_text = models.TextField(help_text="Raw transcript text from Whisper.")
+    duration = models.IntegerField(null=True, blank=True, help_text="Video duration in seconds.")
+    language = models.CharField(max_length=10, default="", help_text="Detected language (e.g. 'de', 'en').")
 
     # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True, help_text="Zeitstempel der Transkription")
+    created_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp of transcription.")
 
     class Meta:
         verbose_name_plural = "Transcripts"
 
     def __str__(self):
         preview = self.raw_text[:50] + "..." if len(self.raw_text) > 50 else self.raw_text
-        return f"Transcript für {self.quiz.title}: {preview}"
+        return f"Transcript for {self.quiz.title}: {preview}"
 
 
 class Question(models.Model):
-    """Speichert einzelne Fragen eines Quiz"""
+    """Stores a single question belonging to a quiz."""
 
-    # Beziehung
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions", help_text="Zugehöriges Quiz")
+    # Relations
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions", help_text="Associated quiz.")
 
-    # Frage-Daten
-    question_title = models.CharField(max_length=500, help_text="Der Fragetext")
+    # Question data
+    question_title = models.CharField(max_length=500, help_text="The question text.")
     question_options = models.JSONField(
-        help_text="Liste mit 4 Antwortmöglichkeiten als JSON Array"
-        # Beispiel: ["Option A", "Option B", "Option C", "Option D"]
+        help_text="List of 4 answer options as a JSON array."
+        # Example: ["Option A", "Option B", "Option C", "Option D"]
     )
-    answer = models.CharField(max_length=255, help_text="Die richtige Antwort")
+    answer = models.CharField(max_length=255, help_text="The correct answer.")
 
     # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True, help_text="Zeitstempel der Erstellung")
-    updated_at = models.DateTimeField(auto_now=True, help_text="Zeitstempel der letzten Änderung")
+    created_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp of creation.")
+    updated_at = models.DateTimeField(auto_now=True, help_text="Timestamp of last update.")
 
     class Meta:
         ordering = ["quiz", "created_at"]
@@ -96,29 +96,29 @@ class Question(models.Model):
 
 
 class ProcessingLog(models.Model):
-    """Logging für die Verarbeitung eines Quiz (für Debugging & Error-Handling)"""
+    """Logs each processing step of a quiz for debugging and error tracking."""
 
     STATUS_CHOICES = [
-        ("download_started", "Download gestartet"),
-        ("download_completed", "Download fertig"),
-        ("transcription_started", "Transkription gestartet"),
-        ("transcription_completed", "Transkription fertig"),
-        ("generation_started", "Quiz-Generierung gestartet"),
-        ("generation_completed", "Quiz-Generierung fertig"),
-        ("error", "Fehler aufgetreten"),
-        ("completed", "Vollständig verarbeitet"),
+        ("download_started", "Download started"),
+        ("download_completed", "Download completed"),
+        ("transcription_started", "Transcription started"),
+        ("transcription_completed", "Transcription completed"),
+        ("generation_started", "Quiz generation started"),
+        ("generation_completed", "Quiz generation completed"),
+        ("error", "Error occurred"),
+        ("completed", "Fully processed"),
     ]
 
-    # Beziehung
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="logs", help_text="Zugehöriges Quiz")
+    # Relations
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="logs", help_text="Associated quiz.")
 
-    # Log-Informationen
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, help_text="Status des Verarbeitungsschritts")
-    message = models.TextField(blank=True, default="", help_text="Nachricht oder Error-Details")
-    error_details = models.JSONField(null=True, blank=True, help_text="Detaillierte Error-Informationen falls Fehler")
+    # Log fields
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, help_text="Status of the processing step.")
+    message = models.TextField(blank=True, default="", help_text="Message or error details.")
+    error_details = models.JSONField(null=True, blank=True, help_text="Detailed error information if an error occurred.")
 
-    # Timestamp
-    created_at = models.DateTimeField(auto_now_add=True, help_text="Zeitstempel des Log-Eintrags")
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp of the log entry.")
 
     class Meta:
         ordering = ["-created_at"]

@@ -51,7 +51,6 @@ Requirements:
 
 - Do not include explanations, comments, or any text outside the JSON.
 
-- All text fields (title, description, questions, answers) must be written in German.
 
 Transkript:
 {transcript}
@@ -62,6 +61,6 @@ Transkript:
     text = response.text.strip()
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if not match:
-        raise ValueError("Kein gültiges JSON in Gemini-Antwort gefunden.")
+        raise ValueError("No valid JSON found in Gemini response.")
 
     return json.loads(match.group())

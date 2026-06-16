@@ -28,9 +28,9 @@ class QuizListCreateView(APIView):
         """Download, transcribe, and generate a quiz from a YouTube URL."""
         url = request.data.get("url")
         if not url:
-            return Response({"detail": "URL ist erforderlich."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "URL is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        quiz = Quiz.objects.create(owner=request.user, title="Wird verarbeitet...", video_url=url, status="processing")
+        quiz = Quiz.objects.create(owner=request.user, title="Processing...", video_url=url, status="processing")
         ProcessingLog.objects.create(quiz=quiz, status="download_started")
 
         try:
@@ -87,9 +87,9 @@ class QuizDetailView(APIView):
         try:
             quiz = Quiz.objects.get(pk=pk)
         except Quiz.DoesNotExist:
-            return None, Response({"detail": "Quiz nicht gefunden."}, status=status.HTTP_404_NOT_FOUND)
+            return None, Response({"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND)
         if quiz.owner != user:
-            return None, Response({"detail": "Zugriff verweigert."}, status=status.HTTP_403_FORBIDDEN)
+            return None, Response({"detail": "Access denied."}, status=status.HTTP_403_FORBIDDEN)
         return quiz, None
 
     def get(self, request, pk):
