@@ -1,25 +1,47 @@
-import os
+import re
+from urllib.parse import parse_qs, urlparse
+
 import yt_dlp
-from urllib.parse import urlparse, parse_qs
+
+YOUTUBE_DOMAINS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be", "www.youtu.be"}
+
+YOUTUBE_ID_RE = re.compile(r"^[a-zA-Z0-9_-]{11}$")
 
 
 def extract_video_id(url: str) -> str:
     """Extract the video ID from a YouTube URL.
 
     Returns the video ID as a string."""
-    parsed = urlparse(url)
-    video_id = parse_qs(parsed.query).get("v", [None])[0]
-    if not video_id:
+    parsed = urlparse(url.strip())
+
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError("Invalid URL: must start with http:// or https://")
+
+    if parsed.netloc not in YOUTUBE_DOMAINS:
+        raise ValueError("Invalid URL: not a YouTube link.")
+
+    # youtu.be/<id>
+    if parsed.netloc in ("youtu.be", "www.youtu.be"):
+        video_id = parsed.path.lstrip("/").split("/")[0]
+
+    # youtube.com/shorts/<id> or /embed/<id> or /v/<id>
+    elif parsed.path.startswith(("/shorts/", "/embed/", "/v/")):
+        video_id = parsed.path.split("/")[2]
+
+    # youtube.com/watch?v=<id>
+    else:
+        video_id = parse_qs(parsed.query).get("v", [None])[0]
+
+    if not video_id or not YOUTUBE_ID_RE.match(video_id):
         raise ValueError("No valid YouTube video ID found.")
+
     return video_id
 
 
-def download_audio(url: str) -> str:
+def download_audio(clean_url: str) -> str:
     """Download the audio track of a YouTube video.
 
     Returns the local file path of the downloaded MP3."""
-    video_id = extract_video_id(url)
-    clean_url = f"https://www.youtube.com/watch?v={video_id}"
     tmp_filename = "audio"
 
     ydl_opts = {
