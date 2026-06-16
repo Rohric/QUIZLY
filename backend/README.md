@@ -40,7 +40,7 @@ backend/
 
 ```bash
 git clone https://github.com/Rohric/QUIZLY
-cd backend
+cd quizly/backend
 ```
 
 **2. Create and activate a virtual environment**
