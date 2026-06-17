@@ -32,8 +32,8 @@ class LogoutView(APIView):
     def post(self, request):
         """Delete the access and refresh token cookies."""
         response = Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
-        response.delete_cookie("access_token", samesite="LAX", secure=True, httponly=True)
-        response.delete_cookie("refresh_token", samesite="LAX", secure=True, httponly=True)
+        response.delete_cookie("access_token", path="/", samesite="LAX")
+        response.delete_cookie("refresh_token", path="/", samesite="LAX")
         return response
 
 
@@ -71,8 +71,8 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 
         response = Response({"message": "Login successful."})
 
-        response.set_cookie(key="access_token", value=access, httponly=True, secure=True, samesite="LAX")
-        response.set_cookie(key="refresh_token", value=refresh, httponly=True, secure=True, samesite="LAX")
+        response.set_cookie(key="access_token", value=access, path="/", httponly=True, secure=False, samesite="LAX")
+        response.set_cookie(key="refresh_token", value=refresh, path="/", httponly=True, secure=False, samesite="LAX")
 
         response.data = {"message": "Login successful."}
         return response
@@ -115,5 +115,7 @@ class CookieTokenRefreshView(TokenRefreshView):
         access_token = _validate_and_get_access_token(serializer)
 
         response = Response({"message": "Access token refreshed."})
-        response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="LAX")
+        response.set_cookie(
+            key="access_token", value=access_token, path="/", httponly=True, secure=False, samesite="LAX"
+        )
         return response
