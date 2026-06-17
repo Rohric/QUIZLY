@@ -11,7 +11,6 @@ class Quiz(models.Model):
         ("failed", "Failed"),
     ]
 
-    # Relations
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -19,17 +18,14 @@ class Quiz(models.Model):
         help_text="The user who owns this quiz.",
     )
 
-    # Base fields
     title = models.CharField(max_length=255, help_text="Title of the quiz.")
     description = models.TextField(blank=True, default="", help_text="Description of the quiz.")
     video_url = models.URLField(help_text="URL of the YouTube video.")
 
-    # Status & Tracking
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="processing", help_text="Processing status of the quiz."
     )
 
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp of creation.")
     updated_at = models.DateTimeField(auto_now=True, help_text="Timestamp of last update.")
 
@@ -47,15 +43,12 @@ class Quiz(models.Model):
 class Transcript(models.Model):
     """Stores the transcript of a YouTube video."""
 
-    # Relations
     quiz = models.OneToOneField(Quiz, on_delete=models.CASCADE, related_name="transcript", help_text="Associated quiz.")
 
-    # Transcript data
     raw_text = models.TextField(help_text="Raw transcript text from Whisper.")
     duration = models.IntegerField(null=True, blank=True, help_text="Video duration in seconds.")
     language = models.CharField(max_length=10, default="", help_text="Detected language (e.g. 'de', 'en').")
 
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp of transcription.")
 
     class Meta:
@@ -69,18 +62,12 @@ class Transcript(models.Model):
 class Question(models.Model):
     """Stores a single question belonging to a quiz."""
 
-    # Relations
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions", help_text="Associated quiz.")
 
-    # Question data
     question_title = models.CharField(max_length=500, help_text="The question text.")
-    question_options = models.JSONField(
-        help_text="List of 4 answer options as a JSON array."
-        # Example: ["Option A", "Option B", "Option C", "Option D"]
-    )
+    question_options = models.JSONField(help_text="List of 4 answer options as a JSON array.")
     answer = models.CharField(max_length=255, help_text="The correct answer.")
 
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp of creation.")
     updated_at = models.DateTimeField(auto_now=True, help_text="Timestamp of last update.")
 
@@ -109,15 +96,14 @@ class ProcessingLog(models.Model):
         ("completed", "Fully processed"),
     ]
 
-    # Relations
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="logs", help_text="Associated quiz.")
 
-    # Log fields
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, help_text="Status of the processing step.")
     message = models.TextField(blank=True, default="", help_text="Message or error details.")
-    error_details = models.JSONField(null=True, blank=True, help_text="Detailed error information if an error occurred.")
+    error_details = models.JSONField(
+        null=True, blank=True, help_text="Detailed error information if an error occurred."
+    )
 
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True, help_text="Timestamp of the log entry.")
 
     class Meta:

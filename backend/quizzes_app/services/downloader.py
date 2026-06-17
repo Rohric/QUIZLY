@@ -20,15 +20,12 @@ def extract_video_id(url: str) -> str:
     if parsed.netloc not in YOUTUBE_DOMAINS:
         raise ValueError("Invalid URL: not a YouTube link.")
 
-    # youtu.be/<id>
     if parsed.netloc in ("youtu.be", "www.youtu.be"):
         video_id = parsed.path.lstrip("/").split("/")[0]
 
-    # youtube.com/shorts/<id> or /embed/<id> or /v/<id>
     elif parsed.path.startswith(("/shorts/", "/embed/", "/v/")):
         video_id = parsed.path.split("/")[2]
 
-    # youtube.com/watch?v=<id>
     else:
         video_id = parse_qs(parsed.query).get("v", [None])[0]
 
