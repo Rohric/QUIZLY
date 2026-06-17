@@ -7,6 +7,3 @@ from .models import User
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (("Zusätzliche Felder", {"fields": ("birthdate", "address")}),)
     add_fieldsets = UserAdmin.add_fieldsets + (("Zusätzliche Felder", {"fields": ("birthdate", "address")}),)
-
-
-delete
